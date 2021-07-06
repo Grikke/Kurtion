@@ -2,10 +2,12 @@
 
 ## Installation
 With Shell Console
-`git clone git@github.com:Grikke/Kurtion.git`
-`cd Kurtion`
-`npm install`
-`npm start`
+```shell
+git clone git@github.com:Grikke/Kurtion.git
+cd Kurtion
+npm install
+npm start
+```
 
 To try the package, don't forget to uncomment the example code.
 
