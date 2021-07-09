@@ -3,8 +3,11 @@ Object.prototype.forEach = function(func) {
     func(key, this[key])
   })
 }
+String.prototype.ucfirst = function() {
+  return `${this.charAt(0).toUpperCase()}${this.slice(1)}`
+}
 String.prototype.lcfirst = function() {
-  return this.charAt(0).toUpperCase() + this.slice(1);
+  return `${this.charAt(0).toLowerCase()}${this.slice(1)}`
 }
 
 // const DatabaseReader = require("./Methods/DatabaseReader")
@@ -23,5 +26,5 @@ String.prototype.lcfirst = function() {
 //     maxLength: 20
 //   },
 // })
-// const TableManager = require("./Methods/TableManager")
-// let Table = new TableManager("/ECMAData", "User")
+//const TableManager = require("./Methods/TableManager")
+//let Table = new TableManager("/ECMAData", "User")

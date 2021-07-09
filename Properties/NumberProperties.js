@@ -8,17 +8,22 @@ const Properties = {
   maxSize: isInt,
 }
 
-const Validator = {
-  default: (value, property) => ({ 
-    state: isInt(value) && value !== NaN,
-    return: property,
+const Validators = {
+  type: value => ({ 
+    state: isInt(value), 
+    return: (isInt(value) && typeof value !== "number") ? 
+    parseInt(value) : value
   }),
-  required: value => { state: isInt(value) && value !== NaN },
-  minSize: (value, property) => { state: value >= property },
-  maxSize: (value, property) => { state: value <= property },
+  default: (value, property) => ({ 
+    state: true,
+    return: isInt(value) ? value : property,
+  }),
+  required: (value, property) => (property ? { state: isInt(value) && value !== NaN } : { state: true }),
+  minSize: (value, property) => ({ state: value >= property }),
+  maxSize: (value, property) => ({ state: value <= property }),
 }
 
 module.exports = {
   Properties,
-  Validator
+  Validators
 }
