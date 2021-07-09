@@ -21,9 +21,9 @@ class TableManager {
       encoding: "utf-8"
     }))
   }
-  findData(findData) {
-    
-  }
+  // findData(findData) {
+
+  // }
   insertData(Data) {
     let required = this.getRequiredFields()
     let data = {}, valid = true;
