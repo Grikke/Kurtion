@@ -1,8 +1,10 @@
-const { isInt, isString, isBoolean } = require("./PropertiesMethods")
+const { isInt, isString, isBoolean, isFunction } = require("./PropertiesMethods")
 
 const Properties = {
   type: value => value === "string",
+  transform: isFunction,
   default: isString,
+  unique: isBoolean,
   required: isBoolean,
   minLength: isInt,
   maxLength: isInt,
@@ -12,10 +14,14 @@ const Properties = {
 
 const Validators = {
   type: value => ({ state: isString(value) }),
+  transform: (value, property) => ({state: true, return: property(value)}),
   default: (value, property) => (value == null || value === "" ? {
     state: true,
     return: property
   } : { state: true }),
+  unique: (value, property, object, fieldName) => (property ? 
+    { state: object.findData({[fieldName]: value}).length === 0} 
+  : { state: true }),
   required: (value, property) => (property ? { state: !(value === "" || !isString(value)) } : {state: true}),
   minLength: (value, property) => ({ state: value.length >= property }),
   maxLength: (value, property) => ({ state: value.length <= property }),

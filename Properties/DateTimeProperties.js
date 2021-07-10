@@ -2,20 +2,22 @@ const { isDateTime, isBoolean } = require("./PropertiesMethods")
 
 const Properties = {
   type: value => value === "dateTime",
-  required: isBoolean,
+  transform: isFunction,
   updateDate: isBoolean,
+  required: isBoolean,
 }
 
-const Validator = {
+const Validators = {
   type: value => ({state: isDateTime(value)}),
-  required: (value, property) => (property ? {state: isDateTime(value)} : {state : true}),
+  transform: (value, property) => ({state: true, return: property(value)}),
   updateDate: (value, property) => ({
     state: true, 
     return: property ? new Date().toString() : value 
-  })
+  }),
+  required: (value, property) => (property ? {state: isDateTime(value)} : {state : true}),
 }
 
 module.exports = {
   Properties,
-  Validator
+  Validators
 }

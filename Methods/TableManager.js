@@ -17,27 +17,50 @@ class TableManager {
     }
   }
   getTable() {
-    return JSON.parse(fs.readFileSync(`${this.location}/${this.tableName}.json`, {
-      encoding: "utf-8"
-    }))
+    if (fs.existsSync(`${this.location}/${this.tableName}.json`)) {
+      return JSON.parse(fs.readFileSync(`${this.location}/${this.tableName}.json`, {
+        encoding: "utf-8"
+      }))
+    }
+    else {
+      fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify([]))
+      return []
+    }
   }
-  // findData(findData) {
-
-  // }
+  autoIncrement(fieldName) {
+    let table = this.getTable()
+    let highNumber = 0
+    table.forEach(tableObj => {
+      highNumber = highNumber <= tableObj[fieldName] ? tableObj[fieldName] : highNumber
+    })
+    return highNumber + 1
+  }
+  findData(findData) {
+    let table = this.getTable()
+    let array = []
+    table.forEach(tableObj => {
+      findData.forEach((findKey, findValue) => {
+        if (typeof tableObj[findKey] === "string") {
+          if (tableObj[findKey].match(findValue))
+            array = [...array, tableObj]
+        }
+        else if (tableObj[findKey] === findValue)
+          array = [...array, tableObj]
+      })
+    })
+    return array
+  }
   insertData(Data) {
-    let required = this.getRequiredFields()
+    let tabData = this.getTableConfig()
     let data = {}, valid = true;
-    Data.forEach((fieldName, fieldValue) => {
-      let findIndex = required.find(field => field === fieldName)
-      let validator, prop
-      if (findIndex !== -1) required.splice(findIndex, 1)
-      if (prop = this.getTableConfig()[fieldName]) {
-        validator = this.getPropValidators(prop.type)
+    tabData.forEach((fieldName) => {
+      let validator
+      if (validator = this.getPropValidators(tabData[fieldName].type)) {
         let columnIsValid = true
-        let dataValue = fieldValue
-        prop.forEach((property, propValue) => {
-          if (columnIsValid) {
-            let checkProp = validator[property](fieldValue, propValue)
+        let dataValue = Data[fieldName]
+        validator.forEach((property, func) => {
+          if (columnIsValid && tabData[fieldName][property]) {
+            let checkProp = func(dataValue, tabData[fieldName][property], this, fieldName)
             columnIsValid = checkProp.state
             if (!checkProp.state)
               console.error(`Field "${fieldName.ucfirst()}" is not valid with the "${property}" property`)
@@ -50,22 +73,17 @@ class TableManager {
       }
       else valid = false
     })
-    if (required.length === 0 && valid) {
+    if (valid) {
       let table = [ ...this.getTable(), data]
       fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify(table))
     }
-  }
-  getRequiredFields() {
-    let required = []
-    this.getTableConfig().forEach((columnName, properties) => {
-      if (properties.required) required = [...required, columnName]
-    })
-    return required;
   }
   getTableConfig() {
     let properties
     if (properties = this.DB.readTablesConfig().tables[this.tableName])
       return properties
+    else
+      console.error(`"${this.tableName}" don't seem to have been created`)
   }
   checkTable() {
     try {
