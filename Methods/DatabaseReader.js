@@ -58,15 +58,7 @@ class DatabaseReader {
   }
   getPropSpecs(type) {
     try {
-      return require(`../Properties/${type.lcfirst()}Properties`).Properties
-    }
-    catch {
-      console.error(`Unknow specified type : ${type}`)
-    }
-  }
-  getPropValidators(type) {
-    try {
-      return require(`../Properties/${type.lcfirst()}Properties`).Validators
+      return require(`../Properties/${type.ucfirst()}Properties`).Properties
     }
     catch {
       console.error(`Unknow specified type : ${type}`)
@@ -107,8 +99,8 @@ class DatabaseReader {
           [tableName]: tableColumns
         }
         this.config.tables = tables;
-        fs.writeFileSync(this.location+"/config.json", JSON.stringify(this.getConfig()))
-        fs.writeFileSync(this.location+"/"+tableName+".json", JSON.stringify({}))
+        fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
+        fs.writeFileSync(`${this.location}/${tableName}.json`, JSON.stringify([]))
       }
     }
     else console.error("Table already created")
@@ -116,7 +108,7 @@ class DatabaseReader {
   removeTable(tableName) {
     delete this.config.tables[tableName]
     try {
-      fs.writeFileSync(this.location+"/config.json", JSON.stringify(this.getConfig()))
+      fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
     }
     catch {
       console.error(`Cannot remove table "${tableName}"`)

@@ -1,20 +1,23 @@
-const { isInt } = require("./PropertiesMethods")
+const { isDateTime, isBoolean } = require("./PropertiesMethods")
 
 const Properties = {
-  "autoIncrement": value => typeof value === "boolean",
-  "required": value => typeof value === "boolean",
-  "minSize": isInt,
-  "maxSize": isInt,
+  type: value => value === "dateTime",
+  transform: isFunction,
+  updateDate: isBoolean,
+  required: isBoolean,
 }
 
-const Validator = {
-  "autoIncrement": () => Validator,
-  "required": (value, property) => value === "" || typeof value !== "string" ? false : true,
-  "minSize": (value, property) => value >=  property,
-  "maxSize": (value, property) => value <= property,
+const Validators = {
+  type: value => ({state: isDateTime(value)}),
+  transform: (value, property) => ({state: true, return: property(value)}),
+  updateDate: (value, property) => ({
+    state: true, 
+    return: property ? new Date().toString() : value 
+  }),
+  required: (value, property) => (property ? {state: isDateTime(value)} : {state : true}),
 }
 
 module.exports = {
   Properties,
-  Validator
+  Validators
 }

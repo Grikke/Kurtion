@@ -1,24 +1,39 @@
-const { isInt, isBoolean } = require("./PropertiesMethods")
+const { isInt, isBoolean, isFunction } = require("./PropertiesMethods")
 
 const Properties = {
   type: value => value === "number",
+  transform: isFunction,
   default: isBoolean,
+  unique: isBoolean,
+  autoIncrement: isBoolean,
   required: isBoolean,
   minSize: isInt,
   maxSize: isInt,
 }
 
-const Validator = {
-  default: (value, property) => ({ 
-    state: isInt(value) && value !== NaN,
-    return: property,
+const Validators = {
+  type: value => ({ 
+    state: isInt(value) || value == null || value === NaN, 
+    return: ((isInt(value) && typeof value !== "number") || value === null || value === NaN ) ? 
+    parseInt(value) : value
   }),
-  required: value => { state: isInt(value) && value !== NaN },
-  minSize: (value, property) => { state: value >= property },
-  maxSize: (value, property) => { state: value <= property },
+  transform: (value, property) => ({state: true, return: property(value)}),
+  default: (value, property) => ({ 
+    state: true,
+    return: isInt(value) ? value : property,
+  }),
+  unique: (value, property, object, fieldName) => (property ? 
+    { state: object.findData({[fieldName]: value}).length === 0} 
+  : { state: true }),
+  autoIncrement: (v, property, object, fieldName) => (property ? 
+    { state: true, return:  object.autoIncrement(fieldName) } 
+  : { state: true }),
+  required: (value, property) => (property ? { state: isInt(value) } : { state: true }),
+  minSize: (value, property) => ({ state: value >= property }),
+  maxSize: (value, property) => ({ state: value <= property }),
 }
 
 module.exports = {
   Properties,
-  Validator
+  Validators
 }
