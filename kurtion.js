@@ -18,13 +18,13 @@ module.exports = ({
   location
 }) => {
   return {
+    ...DatabaseReader.constructor(location, name),
     Table: ({
       name,
       properties
     }) => {
-      this.createTable(name, properties)
-      return new TableManager(location, name)
-    },
-    ...new DatabaseReader(location, name)
+      DatabaseReader.createTable(name, properties)
+      return TableManager.constructor(location, name)
+    }
   }
 }

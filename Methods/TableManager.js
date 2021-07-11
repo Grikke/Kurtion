@@ -1,22 +1,23 @@
 const fs = require("file-system")
 const DatabaseReader = require("./DatabaseReader")
 
-class TableManager {
-  constructor(location, tableName) {
+module.exports = {
+  constructor: function(location, tableName) {
     this.tableName = tableName
     this.location = "./"+(typeof location === "string" ? location.trim() : "/ECMAData")
-    this.DB = new DatabaseReader(this.location, "", false)
+    this.DB = DatabaseReader.constructor(this.location, "", false)
     this.checkTable()
-  }
-  getPropValidators(type) {
+    return this
+  },
+  getPropValidators: function(type) {
     try {
       return require(`../Properties/${type.ucfirst()}Properties`).Validators
     }
     catch {
       console.error(`Unknow specified type : ${type}`)
     }
-  }
-  getTable() {
+  },
+  getTable: function() {
     if (fs.existsSync(`${this.location}/${this.tableName}.json`)) {
       return JSON.parse(fs.readFileSync(`${this.location}/${this.tableName}.json`, {
         encoding: "utf-8"
@@ -26,16 +27,16 @@ class TableManager {
       fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify([]))
       return []
     }
-  }
-  autoIncrement(fieldName) {
+  },
+  autoIncrement: function(fieldName) {
     let table = this.getTable()
     let highNumber = 0
     table.forEach(tableObj => {
       highNumber = highNumber <= tableObj[fieldName] ? tableObj[fieldName] : highNumber
     })
     return highNumber + 1
-  }
-  findData(findData) {
+  },
+  findData: function(findData) {
     let table = this.getTable()
     let array = []
     if (!Array.isArray(findData)) findData = [findData]
@@ -52,8 +53,8 @@ class TableManager {
       })
     })
     return array
-  }
-  removeData(findData) {
+  },
+  removeData: function(findData) {
     let table = this.getTable()
     if (!Array.isArray(findData)) findData = [findData]
     findData.forEach(data => {
@@ -66,8 +67,8 @@ class TableManager {
       })
     })
     fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify(table))
-  }
-  updateData(findData, updateData) {
+  },
+  updateData: function(findData, updateData) {
     let tabData = this.getTableConfig()
     let table = this.getTable()
     let valid = true
@@ -130,8 +131,8 @@ class TableManager {
     if (valid) {
       fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify(table))
     }
-  }
-  insertData(Data) {
+  },
+  insertData: function(Data) {
     let tabData = this.getTableConfig()
     let data = {}, valid = true;
     tabData.forEach((fieldName) => {
@@ -158,15 +159,15 @@ class TableManager {
       let table = [ ...this.getTable(), data]
       fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify(table))
     }
-  }
-  getTableConfig() {
+  },
+  getTableConfig: function() {
     let properties
     if (properties = this.DB.readTablesConfig().tables[this.tableName])
       return properties
     else
       console.error(`"${this.tableName}" don't seem to have been created`)
-  }
-  checkTable() {
+  },
+  checkTable: function() {
     try {
       fs.existsSync(`${this.location}/${this.tableName}.json`)
       this.getTableConfig()
@@ -176,5 +177,3 @@ class TableManager {
     }
   }
 }
-
-module.exports = TableManager
