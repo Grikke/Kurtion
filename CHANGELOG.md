@@ -1,3 +1,9 @@
+## v0.3.1 (11.07.2021)
+
+### Fix
+
+- Update Readme documentation
+
 ## v0.3.0 (11.07.2021)
 
 ### Features 
