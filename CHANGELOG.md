@@ -1,3 +1,19 @@
+## v0.3.0 (11.07.2021)
+
+### Features 
+
+- Update, remove and add column in Tables
+- Remove and updateData in tables
+- Exporting structure for package
+
+### Improvements
+
+- add update state to change while updating
+
+### Fix
+
+- Fix auto-increment and unique error
+
 ## v0.2.0 (10.07.2021)
 
 ### Features

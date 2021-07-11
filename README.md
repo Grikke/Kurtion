@@ -36,4 +36,5 @@ To try the package, don't forget to uncomment the example code.
   * maxSize: Maximum number
 
 - dateTime
-  * updateDate: update date column when editing or creating
+  * updateDate: update date column when editing or inserting
+  * createDate: create date column when inserting

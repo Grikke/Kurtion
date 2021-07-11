@@ -11,34 +11,20 @@ String.prototype.lcfirst = function() {
 }
 
 const DatabaseReader = require("./Methods/DatabaseReader")
+const TableManager = require("./Methods/TableManager")
 
-let required = true
-let Data = new DatabaseReader()
-/* Data.createTable("User", {
-  id: {
-     required,
-     type: "number",
-     unique: true,
-     autoIncrement: true,
-  },
-  pseudo: {
-    required,
-    type: "string",
-    minLength: 4,
-    maxLength: 20
-  },
-  creation: {
-    required,
-    type: "dateTime"
-  },
-  updated_at: {
-    updateDate: true,
-    type: "dateTime"
+module.exports = ({
+  name,
+  location
+}) => {
+  return {
+    Table: ({
+      name,
+      properties
+    }) => {
+      this.createTable(name, properties)
+      return new TableManager(location, name)
+    },
+    ...new DatabaseReader(location, name)
   }
-}) */
-/* const TableManager = require("./Methods/TableManager")
-let Table = new TableManager("/ECMAData", "User")
-Table.insertData({
-  pseudo: "Grikke",
-  creation: new Date().toString()
-}) */
+}
