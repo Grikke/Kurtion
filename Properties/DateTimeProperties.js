@@ -1,8 +1,9 @@
-const { isDateTime, isBoolean } = require("./PropertiesMethods")
+const { isDateTime, isBoolean, isFunction } = require("./PropertiesMethods")
 
 const Properties = {
   type: value => value === "dateTime",
   transform: isFunction,
+  createDate: isBoolean,
   updateDate: isBoolean,
   required: isBoolean,
 }
@@ -10,9 +11,14 @@ const Properties = {
 const Validators = {
   type: value => ({state: isDateTime(value)}),
   transform: (value, property) => ({state: true, return: property(value)}),
-  updateDate: (value, property) => ({
+  createDate: (value, property) => ({
     state: true, 
     return: property ? new Date().toString() : value 
+  }),
+  updateDate: (value, property) => ({
+    state: true,
+    return: property ? new Date().toString() : value,
+    update: true
   }),
   required: (value, property) => (property ? {state: isDateTime(value)} : {state : true}),
 }

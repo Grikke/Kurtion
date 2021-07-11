@@ -38,17 +38,98 @@ class TableManager {
   findData(findData) {
     let table = this.getTable()
     let array = []
-    table.forEach(tableObj => {
-      findData.forEach((findKey, findValue) => {
-        if (typeof tableObj[findKey] === "string") {
-          if (tableObj[findKey].match(findValue))
+    if (!Array.isArray(findData)) findData = [findData]
+    findData.forEach(data => {
+      data.forEach((findKey, findValue) => {
+        table.forEach(tableObj => {
+          if (typeof tableObj[findKey] === "string") {
+            if (tableObj[findKey].match(findValue))
+              array = [...array, tableObj]
+          }
+          else if (tableObj[findKey] === findValue)
             array = [...array, tableObj]
-        }
-        else if (tableObj[findKey] === findValue)
-          array = [...array, tableObj]
+        })
       })
     })
     return array
+  }
+  removeData(findData) {
+    let table = this.getTable()
+    if (!Array.isArray(findData)) findData = [findData]
+    findData.forEach(data => {
+      data.forEach((findKey, findValue) => {
+        table = table.filter(tableObj => {
+          if (typeof tableObj[findKey] === "string")
+            return !tableObj[findKey].match(findValue)
+          else return tableObj[findKey] !== findValue
+        })
+      })
+    })
+    fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify(table))
+  }
+  updateData(findData, updateData) {
+    let tabData = this.getTableConfig()
+    let table = this.getTable()
+    let valid = true
+    if (!Array.isArray(findData)) findData = [findData]
+    findData.forEach(data => {
+      data.forEach((findKey, findValue) => {
+        table.forEach((tableObj, tableIndex) => {
+          let data = {...tableObj}
+          if (typeof tableObj[findKey] === "string") {
+            if (tableObj[findKey].match(findValue)) {
+              tabData.forEach((fieldName) => {
+                let validator
+                if (validator = this.getPropValidators(tabData[fieldName].type)) {
+                  let dataValue = updateData[fieldName] ?? tableObj[fieldName]
+                  validator.forEach((property, func) => {
+                    if (valid && tabData[fieldName][property]) {
+                      let checkProp = func(dataValue, tabData[fieldName][property], this, fieldName)
+                      valid = checkProp.state || (property === "unique" && dataValue === tableObj[findKey])
+                      if (!valid)
+                        console.error(`Field "${fieldName.ucfirst()}" is not valid with the "${property}" property`)
+                      dataValue = checkProp.return && checkProp.update ? checkProp.return : dataValue
+                    }
+                    if (valid) {
+                      data = {...data, [fieldName]: dataValue}
+                      table[tableIndex] = data
+                    }
+                    else valid = false
+                  })
+                }
+                else valid = false
+            })
+          }
+        }
+        else if (tableObj[findKey] === findValue) {
+          tabData.forEach((fieldName) => {
+            let validator 
+            if (validator = this.getPropValidators(tabData[fieldName].type)) {
+              let dataValue = updateData[fieldName] ?? tableObj[fieldName]
+              validator.forEach((property, func) => {
+                if (valid && tabData[fieldName][property]) {
+                  let checkProp = func(dataValue, tabData[fieldName][property], this, fieldName)
+                  valid = checkProp.state || (property === "unique" && dataValue === tableObj[findKey])
+                  if (!valid)
+                    console.error(`Field "${fieldName.ucfirst()}" is not valid with the "${property}" property`)
+                  dataValue = checkProp.return && checkProp.update ? checkProp.return : dataValue
+                }
+                if (valid) {
+                  data = {...data, [fieldName]: dataValue}
+                  table[tableIndex] = data
+                }
+                else valid = false
+                })
+              }
+              else valid = false
+            })
+          }
+        })
+      })
+    })
+    if (valid) {
+      fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify(table))
+    }
   }
   insertData(Data) {
     let tabData = this.getTableConfig()

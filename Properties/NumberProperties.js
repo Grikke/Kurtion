@@ -3,9 +3,9 @@ const { isInt, isBoolean, isFunction } = require("./PropertiesMethods")
 const Properties = {
   type: value => value === "number",
   transform: isFunction,
-  default: isBoolean,
-  unique: isBoolean,
+  default: value => typeof value === "number",
   autoIncrement: isBoolean,
+  unique: isBoolean,
   required: isBoolean,
   minSize: isInt,
   maxSize: isInt,
@@ -22,11 +22,11 @@ const Validators = {
     state: true,
     return: isInt(value) ? value : property,
   }),
-  unique: (value, property, object, fieldName) => (property ? 
-    { state: object.findData({[fieldName]: value}).length === 0} 
-  : { state: true }),
   autoIncrement: (v, property, object, fieldName) => (property ? 
     { state: true, return:  object.autoIncrement(fieldName) } 
+  : { state: true }),
+  unique: (value, property, object, fieldName) => (property ? 
+    { state: object.findData({[fieldName]: value}).length === 0} 
   : { state: true }),
   required: (value, property) => (property ? { state: isInt(value) } : { state: true }),
   minSize: (value, property) => ({ state: value >= property }),
