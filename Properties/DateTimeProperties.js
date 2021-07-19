@@ -20,7 +20,7 @@ const Validators = {
     return: property ? new Date().toString() : value,
     update: true
   }),
-  required: (value, property) => (property ? {state: isDateTime(value)} : {state : true}),
+  required: (value, property) => (property ? {state: isDateTime(value) && value != undefined && value != null} : {state : true}),
 }
 
 module.exports = {

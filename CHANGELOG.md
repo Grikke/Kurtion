@@ -1,9 +1,15 @@
+## v0.3.3 (19.07.2021)
+
+### Fix
+
+- No more table name duplication
+- Add a verification to dateTime required
+
 ## v0.3.2 (11.07.2021)
 
 ### Fix
 
 - Fix an export issue
-
 
 ## v0.3.1 (11.07.2021)
 

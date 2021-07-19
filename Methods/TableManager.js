@@ -4,7 +4,8 @@ const DatabaseReader = require("./DatabaseReader")
 module.exports = {
   constructor: function(location, tableName) {
     this.tableName = tableName
-    this.location = "./"+(typeof location === "string" ? location.trim() : "/ECMAData")
+    let isString = typeof location === "string"
+    this.location = (isString && location.trim().startsWith('./') ? "" : "./")+(isString ? location.trim() : "/ECMAData")
     this.DB = DatabaseReader.constructor(this.location, "", false)
     this.checkTable()
     return this

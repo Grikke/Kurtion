@@ -24,7 +24,9 @@ module.exports = ({
       properties
     }) => {
       DatabaseReader.createTable(name, properties)
-      return TableManager.constructor(location, name)
+      let table = Object.create(TableManager)
+      table.constructor(location, name)
+      return table
     }
   }
 }
