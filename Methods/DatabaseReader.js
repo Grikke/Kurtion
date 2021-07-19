@@ -2,9 +2,10 @@ const fs = require("file-system")
 
 module.exports = {
   constructor: function(location, name, create=true) {
-    this.location = "./"+(typeof location === "string" ? location.trim() : "/ECMAData")
+    let isString = typeof location === "string"
+    this.location = (typeof location === "string" && location.trim().startsWith('./') ? "":"./")+(isString ? location.trim() : "/ECMAData")
     if (create) {
-      this.name = typeof location === "string" ? name.trim() : "ECMAData"
+      this.name = typeof name === "string" ? name.trim() : "ECMAData"
       this.createDatabaseFolder()
     }
     return this

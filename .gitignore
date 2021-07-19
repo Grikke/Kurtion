@@ -105,3 +105,7 @@ dist
 
 # Package
 package-lock.json
+
+test.js
+ECMADATA/
+Test/

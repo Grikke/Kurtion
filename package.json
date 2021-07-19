@@ -1,10 +1,10 @@
 {
   "name": "kurtion",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Grikkian JSON Database Manager and Creator Package",
   "main": "kurtion.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node test.js",
     "start": "node kurtion.js"
   },
   "repository": {
