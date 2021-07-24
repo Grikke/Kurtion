@@ -1,6 +1,6 @@
 {
   "name": "kurtion",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Grikkian JSON Database Manager and Creator Package",
   "main": "kurtion.js",
   "scripts": {
@@ -12,7 +12,10 @@
     "url": "git+https://github.com/Grikke/Kurtion.git"
   },
   "keywords": [
-    "framework"
+    "database",
+    "simple",
+    "json",
+    "migration"
   ],
   "author": "Grikke",
   "license": "ISC",

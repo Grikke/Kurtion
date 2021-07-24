@@ -57,6 +57,24 @@ User.insertData({
 
 ## Methods
 
+### Return Statement
+
+Success Statement
+```js
+{
+  state: true,
+  response: /* object or array if data is expected or simple string message */
+}
+```
+Error Statement
+```js
+{
+  state: false,
+  message: /* Specific error message */,
+  error: /* error object, can be empty */
+}
+```
+
 ### Table
 
 - .autoIncrement(fieldName)
@@ -111,25 +129,66 @@ Kurtion.removeColumn("User", [
 
 ### Types
 
-- Common
-  * required: Is required for validation
-  * transform: Transform the value as you wish
+- *Common*
+  * required: Is required for validation 
+    -> Property type : boolean
+  * transform: Transform the value as you wish (function required) except for boolean 
+    -> Property type : function
 
 - string
-  * default : Default value for the column (if not set)
-  * unique: Unique value for each column value
-  * minLength: Minimum length for the string
-  * maxLength: Maximum length for the string
-  * uppercase: transform string to uppercase only
+  * default : Default value for the column (if not set) 
+    -> Property type : string
+  * unique: Unique value for each column value 
+    -> Property type : boolean
+  * minLength: Minimum length for the string 
+    -> Property type : number
+  * maxLength: Maximum length for the string 
+    -> Property type : number
+  * uppercase: transform string to uppercase only 
+    -> Property type : boolean
   * lowercase: transform string to lowercase only 
+    -> Property type : boolean
+
+- array
+  * default : Default value for the column (if not set) 
+    -> Property type : array
+  * elementType: Specify if you want specific element type (string for example) 
+    -> Property type : string (type)
+  * minLength: Minimum length for the array 
+    -> Property type : number
+  * maxLength: Maximum length for the array 
+    -> Property type : number
+
+- object
+  * default : Default value for the column (if not set) 
+    -> Property type : object
+  * elementType: Specify if you want specific element type (string for example) 
+    -> Property type : string (type)
+  * structure: Check that the object contains all key no more, no less 
+    -> Property type : object (only key will be check)
+  * minLength: Minimum length for the object 
+    -> Property type : number
+  * maxLength: Maximum length for the object 
+    -> Property type : number
 
 - number
-  * default : Default value for the column (if not set)
-  * unique: Unique value for each column value
-  * autoIncrement: auto-increment number based on the field (useful for id)
-  * minSize: Minimum number
-  * maxSize: Maximum number
+  * default : Default value for the column (if not set) 
+    -> Property type : number
+  * unique: Unique value for each column value 
+    -> Property type : boolean
+  * autoIncrement: auto-increment number based on the field (useful for id) 
+    -> Property type : boolean
+  * minSize: Minimum number 
+    -> Property type : number
+  * maxSize: Maximum number 
+    -> Property type : number
 
 - dateTime
-  * updateDate: update date column when editing or inserting
-  * createDate: create date column when inserting
+  * updateDate: update date column when editing or inserting 
+    -> Property type : boolean
+  * createDate: create date column when inserting 
+    -> Property type : boolean
+
+- boolean
+  * default : Default value for the column (if not set) 
+    -> Property type : boolean

@@ -2,7 +2,7 @@ const { isDateTime, isBoolean, isFunction } = require("./PropertiesMethods")
 
 const Properties = {
   type: value => value === "dateTime",
-  transform: isFunction,
+  transform: value => isFunction(value) && isDateTime(value(null)),
   createDate: isBoolean,
   updateDate: isBoolean,
   required: isBoolean,

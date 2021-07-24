@@ -1,3 +1,4 @@
+const { stateError: Error, stateSuccess: Success } = require("./StateReturn")
 const fs = require("file-system")
 
 module.exports = {
@@ -6,51 +7,50 @@ module.exports = {
     this.location = (typeof location === "string" && location.trim().startsWith('./') ? "":"./")+(isString ? location.trim() : "/ECMAData")
     if (create) {
       this.name = typeof name === "string" ? name.trim() : "ECMAData"
-      this.createDatabaseFolder()
+      let creation = this.createDatabaseFolder()
+      if (creation?.state === false)
+        return creation
     }
     return this
   },
   createDatabaseFolder: function() {
     try {
-      let config
       if (fs.existsSync(this.location)) {
-        if (config = this.readTablesConfig())
-          this.config = config
+        this.readTablesConfig()
       }
       else {
         fs.mkdirSync(this.location)
         if (fs.existsSync(this.location)) {
-          if (config = this.writeTablesConfig())
-            this.config = config
+          this.writeTablesConfig()
         }
-        else console.error("Cannot create the directory")
+        else return Error("Cannot create the directory")
       }
     }
-    catch { console.error("Wrong path or name") }
+    catch (e) { return Error("Wrong path or name", e) }
   },
   readTablesConfig: function() {
-    let config = JSON.parse(fs.readFileSync(this.location+"/config.json", {
-      encoding: "utf-8"
-    }))
-    if (typeof config === "object" && typeof config.name === "string" && typeof config.tables === "object")
-      return config
-    else { 
-      console.error("Config file is wrong")
-      return false
+    try {
+      let config = JSON.parse(fs.readFileSync(this.location+"/config.json", {
+        encoding: "utf-8"
+      }))
+      if (typeof config === "object" && typeof config.name === "string" && typeof config.tables === "object")
+        return this.config = config
+      return Error("Config file is wrong")
     }
+    catch (e) { return Error("Config file is wrong", e) }
   },
   writeTablesConfig: function() {
-    let config = {
-      name: this.name,
-      tables: {}
+    try {
+      let config = {
+        name: this.name,
+        tables: {}
+      }
+      fs.writeFileSync(this.location+"/config.json", JSON.stringify(config))
+      if (fs.existsSync(this.location+"/config.json"))
+        return this.config = config
+      return Error("Config file cannot be created")
     }
-    fs.writeFileSync(this.location+"/config.json", JSON.stringify(config))
-    if (fs.existsSync(this.location+"/config.json"))
-      return config
-    else {
-      console.error("Config file cannot be created")
-      return false
-    }
+    catch (e) { return Error("Config file cannot be created", e) }
   },
   getConfig: function() {
     return this.config
@@ -62,18 +62,19 @@ module.exports = {
     try {
       return require(`../Properties/${type.ucfirst()}Properties`).Properties
     }
-    catch {
-      console.error(`Unknow specified type : ${type}`)
+    catch (e) {
+      return Error(`Unknow specified type : ${type}`, e)
     }
   },
   createTable: function(tableName, columns) {
     let tables = this.getConfig().tables
     let breaking = false;
+    let error = ''
     if (!tables[tableName]) {
       let tableColumns = {}
       columns.forEach((columnName, properties) => {
         if (!properties.type) {
-          console.error(`No type specified for "${columnName}"`)
+          error = `No type specified for "${columnName}"`
           breaking = true
           return
         }
@@ -81,7 +82,7 @@ module.exports = {
         if (Spec) {
           properties.forEach((attribute, attrVal) => {
             if (!Spec[attribute](attrVal)) {
-              console.error(`Wrong attributes for property "${attribute}"`)
+              error = `Wrong attributes for property "${attribute}"`
               breaking = true
               return
             }
@@ -103,26 +104,29 @@ module.exports = {
         this.config.tables = tables;
         fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
         fs.writeFileSync(`${this.location}/${tableName}.json`, JSON.stringify([]))
+        return Success({[tableName]: tableColumns})
       }
+      else return Error(error)
     }
+    else return Error('Table already exist')
   },
   removeTable: function(tableName) {
     delete this.config.tables[tableName]
     try {
       fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
+      return Success(this.getConfig())
     }
-    catch {
-      console.error(`Cannot remove table "${tableName}"`)
-    }
+    catch (e) { return Error(`Cannot remove table "${tableName}"`, e) }
   },
   insertColumn: function(tableName, columns) {
     let tables = this.getConfig().tables
     let breaking = false
+    let error = ''
     if (tables[tableName]) {
       let tableColumns = {}
       columns.forEach((columnName, properties) => {
         if (!properties.type) {
-          console.error(`No type specified for "${columnName}"`)
+          error = `No type specified for "${columnName}"`
           breaking = true
           return
         }
@@ -130,7 +134,7 @@ module.exports = {
         if (Spec) {
           properties.forEach((attribute, attrVal) => {
             if (!Spec[attribute](attrVal)) {
-              console.error(`Wrong attributes for property "${attribute}"`)
+              error = `Wrong attributes for property "${attribute}"`
               breaking = true
               return
             }
@@ -154,20 +158,23 @@ module.exports = {
         }
         this.config.tables = tables;
         fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
+        return Success(this.getConfig())
       }
+      else return Error(error)
     }
-    else console.error("Table didn't exist")
+    else return Error(`Table "${tableName}" didn't exist`)
   },
   updateColumn: function(tableName, columnName, columnProps) {
     let tableConfig = this.getConfig().tables[tableName][columnName]
     let prop = {}, isValid = true
     let Spec = this.getPropSpecs(tableConfig.type)
+    let error = ''
     columnProps.forEach((propName, propValue) => {
       if (Spec[propName](propValue))
         prop = { ...prop, [propName]: propValue }
       else { 
         isValid = false
-        console.error(`Property ${propName} is not valid`)
+        error = `Property ${propName} is not valid`
       }
     })
     if (isValid) {
@@ -176,7 +183,9 @@ module.exports = {
         ...prop
       }
       fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
+      return Success(this.getConfig())
     }
+    else return Error(error)
   },
   removeColumn: function(tableName, arrayColumn) {
     let tablesConfig = this.getConfig().tables
@@ -193,7 +202,8 @@ module.exports = {
         delete this.getConfig().tables[tableName][columnName]
       })
       fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
+      return Success(this.getConfig())
     }
-    else console.error("Table didn't exist")
+    else return Error(`Table "${tableName}" didn't exist`)
   }
 }

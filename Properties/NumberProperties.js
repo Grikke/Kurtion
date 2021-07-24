@@ -2,7 +2,7 @@ const { isInt, isBoolean, isFunction } = require("./PropertiesMethods")
 
 const Properties = {
   type: value => value === "number",
-  transform: isFunction,
+  transform: value => isFunction(value) && isInt(value(9)),
   default: value => typeof value === "number",
   autoIncrement: isBoolean,
   unique: isBoolean,

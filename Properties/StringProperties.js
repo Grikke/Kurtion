@@ -2,7 +2,7 @@ const { isInt, isString, isBoolean, isFunction } = require("./PropertiesMethods"
 
 const Properties = {
   type: value => value === "string",
-  transform: isFunction,
+  transform: value => isFunction(value) && isString(value("test")),
   default: isString,
   unique: isBoolean,
   required: isBoolean,
