@@ -1,12 +1,3 @@
-const Types = {
-  string: methods.isString,
-  number: methods.isInt,
-  boolean: methods.isBoolean,
-  array: methods.isArray,
-  object: methods.isObject,
-  dateTime: methods.isDateTime,
-}
-
 const methods = {
   isInt: v => parseInt(v) !== NaN && parseInt(v) == v,
   isString: v => typeof v === "string",
@@ -17,6 +8,15 @@ const methods = {
   isDateTime: v => new Date(v).getDate() !== NaN,
   isType: v => Types[v] != undefined,
   checkType: (v, c) => c.filter(e => Types[v](e)).length === c.length
+}
+
+const Types = {
+  string: methods.isString,
+  number: methods.isInt,
+  boolean: methods.isBoolean,
+  array: methods.isArray,
+  object: methods.isObject,
+  dateTime: methods.isDateTime,
 }
 
 module.exports = methods
