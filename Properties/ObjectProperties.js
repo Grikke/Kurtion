@@ -19,7 +19,9 @@ const Validators = {
     return: property
   } : { state: true }),
   elementType: (value, property) => (property ? {state: checkType(property, value)} : {state: true}),
-  structure: (value, property) => (property ? {state: value.filter((e, key) => property[key] !== undefined).count() === value.count() && value.count() === property.count()} : {state: true}),
+  structure: (value, property) => (property ? 
+    {state: value.filter(e => property[e] !== undefined).count() === value.count() && value.count() === property.count()} 
+    : {state: true}),
   required: (value, property) => (property ? { state: isArray(value) && value.length !== 0 } : {state: true}),
   minLength: (value, property) => ({ state: value.count() >= property }),
   maxLength: (value, property) => ({ state: value.count() <= property }),
