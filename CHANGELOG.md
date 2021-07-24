@@ -1,3 +1,16 @@
+## v0.4.0 (23.07.2021)
+
+### Features
+
+- Add Boolean Type (simple properties)
+- Add Array Type (check element type properties)
+- Add Object Type
+- Return State of the request for each 
+
+### Improvement
+
+- Check that transform function give the right type value
+
 ## v0.3.3 (19.07.2021)
 
 ### Fix
@@ -25,7 +38,7 @@
 - Remove and updateData in tables
 - Exporting structure for package
 
-### Improvements
+### Improvement
 
 - add update state to change while updating
 
