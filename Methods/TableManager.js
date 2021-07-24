@@ -1,4 +1,5 @@
 const fs = require("file-system")
+const { stateError: Error, stateSuccess: Success } = require("./StateReturn")
 const DatabaseReader = require("./DatabaseReader")
 
 module.exports = {
@@ -15,7 +16,7 @@ module.exports = {
       return require(`../Properties/${type.ucfirst()}Properties`).Validators
     }
     catch {
-      console.error(`Unknow specified type : ${type}`)
+      return Error(`Unknow specified type : ${type}`)
     }
   },
   getTable: function() {
@@ -26,7 +27,7 @@ module.exports = {
     }
     else {
       fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify([]))
-      return []
+      return Error("This table didn't seem to exist")
     }
   },
   autoIncrement: function(fieldName) {
@@ -38,41 +39,50 @@ module.exports = {
     return highNumber + 1
   },
   findData: function(findData) {
-    let table = this.getTable()
-    let array = []
-    if (!Array.isArray(findData)) findData = [findData]
-    findData.forEach(data => {
-      data.forEach((findKey, findValue) => {
-        table.forEach(tableObj => {
-          if (typeof tableObj[findKey] === "string") {
-            if (tableObj[findKey].match(findValue))
+    try {
+      let table = this.getTable()
+      let array = []
+      if (!Array.isArray(findData)) findData = [findData]
+      findData.forEach(data => {
+        data.forEach((findKey, findValue) => {
+          table.forEach(tableObj => {
+            if (typeof tableObj[findKey] === "string") {
+              if (tableObj[findKey].match(findValue))
+                array = [...array, tableObj]
+            }
+            else if (tableObj[findKey] === findValue)
               array = [...array, tableObj]
-          }
-          else if (tableObj[findKey] === findValue)
-            array = [...array, tableObj]
+          })
         })
       })
-    })
-    return array
+      return Success(array)
+    }
+    catch (e) { return Error("Can't find data", e) }
   },
   removeData: function(findData) {
-    let table = this.getTable()
-    if (!Array.isArray(findData)) findData = [findData]
-    findData.forEach(data => {
-      data.forEach((findKey, findValue) => {
-        table = table.filter(tableObj => {
-          if (typeof tableObj[findKey] === "string")
-            return !tableObj[findKey].match(findValue)
-          else return tableObj[findKey] !== findValue
+    try {
+      let table = this.getTable()
+      if (!Array.isArray(findData)) findData = [findData]
+      findData.forEach(data => {
+        data.forEach((findKey, findValue) => {
+          table = table.filter(tableObj => {
+            if (typeof tableObj[findKey] === "string")
+              return !tableObj[findKey].match(findValue)
+            else return tableObj[findKey] !== findValue
+          })
         })
       })
-    })
-    fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify(table))
+      fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify(table))
+      return Success('Data removed')
+    }
+    catch (e) {
+      return Error("Can't remove data", e)
+    }
   },
   updateData: function(findData, updateData) {
     let tabData = this.getTableConfig()
     let table = this.getTable()
-    let valid = true
+    let valid = true, error = ''
     if (!Array.isArray(findData)) findData = [findData]
     findData.forEach(data => {
       data.forEach((findKey, findValue) => {
@@ -89,7 +99,7 @@ module.exports = {
                       let checkProp = func(dataValue, tabData[fieldName][property], this, fieldName)
                       valid = checkProp.state || (property === "unique" && dataValue === tableObj[findKey])
                       if (!valid)
-                        console.error(`Field "${fieldName.ucfirst()}" is not valid with the "${property}" property`)
+                        error = `Field "${fieldName.ucfirst()}" is not valid with the "${property}" property`
                       dataValue = checkProp.return && checkProp.update ? checkProp.return : dataValue
                     }
                     if (valid) {
@@ -113,7 +123,7 @@ module.exports = {
                   let checkProp = func(dataValue, tabData[fieldName][property], this, fieldName)
                   valid = checkProp.state || (property === "unique" && dataValue === tableObj[findKey])
                   if (!valid)
-                    console.error(`Field "${fieldName.ucfirst()}" is not valid with the "${property}" property`)
+                    error = `Field "${fieldName.ucfirst()}" is not valid with the "${property}" property`
                   dataValue = checkProp.return && checkProp.update ? checkProp.return : dataValue
                 }
                 if (valid) {
@@ -131,11 +141,14 @@ module.exports = {
     })
     if (valid) {
       fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify(table))
+      return Success('Data updated')
     }
+    return Error(error)
   },
   insertData: function(Data) {
     let tabData = this.getTableConfig()
     let data = {}, valid = true;
+    let error
     tabData.forEach((fieldName) => {
       let validator
       if (validator = this.getPropValidators(tabData[fieldName].type)) {
@@ -146,7 +159,7 @@ module.exports = {
             let checkProp = func(dataValue, tabData[fieldName][property], this, fieldName)
             columnIsValid = checkProp.state
             if (!checkProp.state)
-              console.error(`Field "${fieldName.ucfirst()}" is not valid with the "${property}" property`)
+              error = `Field "${fieldName.ucfirst()}" is not valid with the "${property}" property`
             dataValue = checkProp.return ? checkProp.return : dataValue
           }
         })
@@ -159,22 +172,26 @@ module.exports = {
     if (valid) {
       let table = [ ...this.getTable(), data]
       fs.writeFileSync(`${this.location}/${this.tableName}.json`, JSON.stringify(table))
+      return Success('Data inserted')
     }
+    return Error(error)
   },
   getTableConfig: function() {
     let properties
     if (properties = this.DB.readTablesConfig().tables[this.tableName])
       return properties
     else
-      console.error(`"${this.tableName}" don't seem to have been created`)
+      return Error(`"${this.tableName}" don't seem to have been created`)
   },
   checkTable: function() {
+    let e = `Table "${this.tableName}" or location could not be found`
     try {
-      fs.existsSync(`${this.location}/${this.tableName}.json`)
-      this.getTableConfig()
+      if (fs.existsSync(`${this.location}/${this.tableName}.json`))
+        this.getTableConfig()
+      return Error(e)
     }
-    catch {
-      console.error(`Table "${this.tableName}" or location could not be found`)
+    catch (error) {
+      return Error(e, error)
     }
   }
 }
