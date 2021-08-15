@@ -1,4 +1,4 @@
-const { isInt, isBoolean, isFunction } = require("./PropertiesMethods")
+const { isInt, isBoolean, isFunction, toFunction } = require("./PropertiesMethods")
 
 const Properties = {
   type: value => value === "number",
@@ -17,7 +17,7 @@ const Validators = {
     return: ((isInt(value) && typeof value !== "number") || value === null || value === NaN ) ? 
     parseInt(value) : value
   }),
-  transform: (value, property) => ({state: true, return: property(value)}),
+  transform: (value, property) => ({state: true, return: toFunction(property, value)}),
   default: (value, property) => ({ 
     state: true,
     return: isInt(value) ? value : property,

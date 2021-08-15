@@ -7,7 +7,8 @@ const methods = {
   isFunction: v => typeof v === "function",
   isDateTime: v => new Date(v).getDate() !== NaN,
   isType: v => Types[v] != undefined,
-  checkType: (v, c) => c.filter(e => Types[v](e)).length === c.length
+  checkType: (v, c) => c.filter(e => Types[v](e)).length === c.length,
+  toFunction: (f, v) => eval(f.replace('(e)', `(e=${JSON.stringify(v)})`))()
 }
 
 const Types = {
