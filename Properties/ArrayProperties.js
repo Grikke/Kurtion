@@ -1,4 +1,4 @@
-const { isInt, checkType, isType, isArray, isBoolean, isFunction } = require("./PropertiesMethods")
+const { isInt, checkType, isType, isArray, isBoolean, isFunction, toFunction } = require("./PropertiesMethods")
 
 const Properties = {
   type: value => value === "array",
@@ -12,7 +12,7 @@ const Properties = {
 
 const Validators = {
   type: value => ({ state: isArray(value) || value == null }),
-  transform: (value, property) => ({state: true, return: property(value)}),
+  transform: (value, property) => ({state: true, return: toFunction(property, value)}),
   default: (value, property) => (value == null || value === "" ? {
     state: true,
     return: property

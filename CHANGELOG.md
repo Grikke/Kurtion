@@ -1,3 +1,9 @@
+## v0.4.1 (15.08.2021)
+
+### Fix
+
+- Fix Function json integration issue 
+
 ## v0.4.0 (23.07.2021)
 
 ### Features

@@ -1,6 +1,6 @@
 {
   "name": "kurtion",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Grikkian JSON Database Manager and Creator Package",
   "main": "kurtion.js",
   "scripts": {

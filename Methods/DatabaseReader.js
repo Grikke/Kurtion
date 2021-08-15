@@ -1,6 +1,15 @@
 const { stateError: Error, stateSuccess: Success } = require("./StateReturn")
 const fs = require("file-system")
 
+const stringifyCase = (k, val) => {
+  switch (typeof val) {
+    case 'function':
+      return val+''.replace(/\((.*)\)/, '(e)')
+    default:
+      return val
+  }
+}
+
 module.exports = {
   constructor: function(location, name, create=true) {
     let isString = typeof location === "string"
@@ -45,7 +54,7 @@ module.exports = {
         name: this.name,
         tables: {}
       }
-      fs.writeFileSync(this.location+"/config.json", JSON.stringify(config))
+      fs.writeFileSync(this.location+"/config.json", JSON.stringify(config, stringifyCase))
       if (fs.existsSync(this.location+"/config.json"))
         return this.config = config
       return Error("Config file cannot be created")
@@ -102,7 +111,7 @@ module.exports = {
           [tableName]: tableColumns
         }
         this.config.tables = tables;
-        fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
+        fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig(), stringifyCase))
         fs.writeFileSync(`${this.location}/${tableName}.json`, JSON.stringify([]))
         return Success({[tableName]: tableColumns})
       }
@@ -113,7 +122,7 @@ module.exports = {
   removeTable: function(tableName) {
     delete this.config.tables[tableName]
     try {
-      fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
+      fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig(), stringifyCase))
       return Success(this.getConfig())
     }
     catch (e) { return Error(`Cannot remove table "${tableName}"`, e) }
@@ -157,7 +166,7 @@ module.exports = {
           }
         }
         this.config.tables = tables;
-        fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
+        fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig(), stringifyCase))
         return Success(this.getConfig())
       }
       else return Error(error)
@@ -182,7 +191,7 @@ module.exports = {
         ...tableConfig,
         ...prop
       }
-      fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
+      fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig(), stringifyCase))
       return Success(this.getConfig())
     }
     else return Error(error)
@@ -201,7 +210,7 @@ module.exports = {
           console.error(`Column "${columnName}" didn't exist`)
         delete this.getConfig().tables[tableName][columnName]
       })
-      fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig()))
+      fs.writeFileSync(`${this.location}/config.json`, JSON.stringify(this.getConfig(), stringifyCase))
       return Success(this.getConfig())
     }
     else return Error(`Table "${tableName}" didn't exist`)
